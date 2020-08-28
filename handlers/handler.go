@@ -13,6 +13,7 @@ import (
 	"github.com/bianjieai/irita-sync/msgs/evidence"
 	"github.com/bianjieai/irita-sync/msgs/staking"
 	"github.com/bianjieai/irita-sync/msgs/gov"
+	"github.com/bianjieai/irita-sync/msgs/ibc"
 )
 
 func HandleTxMsg(v types.Msg) (MsgDocInfo) {
@@ -51,6 +52,9 @@ func HandleTxMsg(v types.Msg) (MsgDocInfo) {
 	}
 	if GovDocInfo, ok := gov.HandleTxMsg(v); ok {
 		return GovDocInfo
+	}
+	if IbcDocInfo, ok := ibc.HandleTxMsg(v); ok {
+		return IbcDocInfo
 	}
 	return MsgDocInfo{}
 }

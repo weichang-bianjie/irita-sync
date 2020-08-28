@@ -16,6 +16,9 @@ import (
 	crisis "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	//coinswap "github.com/irismod/coinswap/types"
 	//htlc "github.com/irismod/htlc/types"
+	ibctransfer "github.com/cosmos/cosmos-sdk/x/ibc/20-transfer/types"
+	ibcchannel "github.com/cosmos/cosmos-sdk/x/ibc/04-channel/types"
+	ibctendermint "github.com/cosmos/cosmos-sdk/x/ibc/07-tendermint/types"
 )
 
 const (
@@ -62,9 +65,12 @@ const (
 	MsgTypeDeposit                        = "deposit"
 	MsgTypeVote                           = "vote"
 
-	TxTypeCreateHTLC = "CreateHTLC"
-	TxTypeClaimHTLC  = "ClaimHTLC"
-	TxTypeRefundHTLC = "RefundHTLC"
+	MsgTypeIBCTransfer                 = "ibc_transfer"
+	MsgTypeIBCMsgPacket                = "ibc_packet"
+	MsgTypeIBCMsgTimeout               = "ibc_timeout"
+	MsgTypeIBCCreateClient             = "create_client"
+	MsgTypeIBCUpdateClient             = "update_client"
+	MsgTypeIBCSubmitClientMisbehaviour = "submit_client_misbehaviour"
 
 	MsgTypeCreateHTLC = "CreateHTLC"
 	MsgTypeClaimHTLC  = "ClaimHTLC"
