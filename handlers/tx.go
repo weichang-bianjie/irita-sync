@@ -36,18 +36,18 @@ func ParseBlockAndTxs(b int64, client *pool.Client) (*models.Block, []*models.Tx
 		block = v
 	}
 	blockDoc = models.Block{
-		Height:   block.Block.Height,
-		Time:     block.Block.Time.Unix(),
-		Hash:     block.Block.Header.Hash().String(),
-		Txn:      int64(len(block.Block.Data.Txs)),
-		Proposer: block.Block.ProposerAddress.String(),
+		Height:    block.Block.Height,
+		TimeStamp: block.Block.Time.Unix(),
+		Hash:      block.Block.Header.Hash().String(),
+		Txn:       int64(len(block.Block.Data.Txs)),
+		//Proposer: block.Block.ProposerAddress.String(),
 	}
 
 	txDocs := make([]*models.Tx, 0, len(block.Block.Txs))
 	if len(block.Block.Txs) > 0 {
-		for _, v := range block.Block.Txs {
-			txDoc, ops := parseTx(client, v, block.Block)
-			if txDoc.TxHash != "" && len(txDoc.Type) > 0 {
+		for i, v := range block.Block.Txs {
+			txDoc, ops := parseTx(client, v, block.Block, i)
+			if txDoc.Hash != "" && len(txDoc.Type) > 0 {
 				txDocs = append(txDocs, &txDoc)
 				if len(ops) > 0 {
 					txnOps = append(txnOps, ops...)
@@ -59,7 +59,7 @@ func ParseBlockAndTxs(b int64, client *pool.Client) (*models.Block, []*models.Tx
 	return &blockDoc, txDocs, txnOps, nil
 }
 
-func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block) (models.Tx, []txn.Op) {
+func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block, txIndex int) (models.Tx, []txn.Op) {
 	var (
 		docTx     models.Tx
 		docTxMsgs []models.DocTxMsg
@@ -75,7 +75,7 @@ func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block) (models.Tx, [
 	txHash := utils.BuildHex(txBytes.Hash())
 
 	authTx := Tx.(signing.Tx)
-	fee := models.BuildFee(authTx.GetFee(), authTx.GetGas())
+	//fee := models.BuildFee(authTx.GetFee(), authTx.GetGas())
 	memo := authTx.GetMemo()
 
 	txResult, err := c.Tx(txBytes.Hash(), false)
@@ -92,24 +92,24 @@ func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block) (models.Tx, [
 		}
 	}
 	status := parseTxStatus(txResult.TxResult.Code)
-	log := txResult.TxResult.Log
+	//log := txResult.TxResult.Log
 
 	msgs := authTx.GetMsgs()
 	if len(msgs) == 0 {
 		return docTx, txnOps
 	}
 	docTx = models.Tx{
-		Height: height,
-		Time:   block.Time.Unix(),
-		TxHash: txHash,
-		Fee:    &fee,
+		BlockHeight: height,
+		TimeStamp:   block.Time.Unix(),
+		Hash:        txHash,
+		//Fee:    &fee,
 		Memo:   memo,
 		Status: status,
-		Log:    log,
+		//Log:    log,
 		Events: parseEvents(txResult.TxResult.Events),
 	}
 	for i, v := range msgs {
-		msgDocInfo, ops := HandleTxMsg(v)
+		msgDocInfo, ops := HandleTxMsg(v, &docTx, txIndex, i)
 		if len(msgDocInfo.Addrs) == 0 {
 			continue
 		}
@@ -122,19 +122,19 @@ func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block) (models.Tx, [
 
 		docTx.Addrs = append(docTx.Addrs, removeDuplicatesFromSlice(msgDocInfo.Addrs)...)
 		docTxMsgs = append(docTxMsgs, msgDocInfo.DocTxMsg)
-		docTx.Types = append(docTx.Types, msgDocInfo.DocTxMsg.Type)
+		//docTx.Types = append(docTx.Types, msgDocInfo.DocTxMsg.Type)
 		if len(ops) > 0 {
 			txnOps = append(txnOps, ops...)
 		}
 	}
 	docTx.Signers = removeDuplicatesFromSlice(docTx.Signers)
-	docTx.Types = removeDuplicatesFromSlice(docTx.Types)
+	//docTx.Types = removeDuplicatesFromSlice(docTx.Types)
 	docTx.Addrs = removeDuplicatesFromSlice(docTx.Addrs)
 
 	docTx.DocTxMsgs = docTxMsgs
 
 	// don't save txs which have not parsed
-	if docTx.Type == "" || docTx.TxHash == "" {
+	if docTx.Type == "" || docTx.Hash == "" {
 		return models.Tx{}, txnOps
 	}
 

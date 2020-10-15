@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"crypto/md5"
 )
 
 func BuildHex(bytes []byte) string {
@@ -69,4 +70,11 @@ func ConvStrToInt64(str string) (int64, error) {
 func RandInt(n int) int {
 	rand.NewSource(time.Now().Unix())
 	return rand.Intn(n)
+}
+
+func Md5(s string) string {
+	h := md5.New()
+	h.Write([]byte(s)) // 需要加密的字符串为 123456
+	cipherStr := h.Sum(nil)
+	return hex.EncodeToString(cipherStr) // 输出加密结果
 }

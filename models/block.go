@@ -3,29 +3,23 @@ package models
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
-	"github.com/bianjieai/irita-sync/confs/server"
 )
 
 const (
-	CollectionNameBlock = "sync_block"
+	CollectionNameBlock = "block"
 )
 
 type (
 	Block struct {
-		Height   int64  `bson:"height"`
-		Hash     string `bson:"hash"`
-		Txn      int64  `bson:"txn"`
-		Time     int64  `bson:"time"`
-		Proposer string `bson:"proposer"`
+		Height    int64  `bson:"height"`
+		Hash      string `bson:"hash"`
+		Txn       int64  `bson:"txn"`
+		TimeStamp int64  `bson:"timestamp"`
 	}
 )
 
 func (d Block) Name() string {
-	if server.SvrConf.ChainId == "" {
-		return CollectionNameBlock
-	}
-	return fmt.Sprintf("sync_%v_block", server.SvrConf.ChainId)
+	return CollectionNameBlock
 }
 
 func (d Block) EnsureIndexes() {
