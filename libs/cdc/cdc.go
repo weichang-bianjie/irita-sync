@@ -25,8 +25,13 @@ import (
 	ctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/std"
-	ibcrecord "gitlab.bianjie.ai/cschain/cschain/modules/ibc-record"
-	"gitlab.bianjie.ai/cschain/cschain/modules/ibc"
+	ibc "gitlab.bianjie.ai/cschain/cschain/modules/ibc/core"
+	brochain "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/brochain/types"
+	fabric "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/fabric/types"
+	tendermint "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/tendermint/types"
+	wutong "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/wutong/types"
+	bcos "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/bcos/types"
+	record "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record/types"
 )
 
 var (
@@ -50,7 +55,7 @@ var (
 		//oracle.AppModuleBasic{},
 		//random.AppModuleBasic{},
 		ibc.AppModuleBasic{},
-		ibcrecord.AppModuleBasic{},
+		//ibcrecord.AppModuleBasic{},
 	)
 )
 
@@ -58,6 +63,12 @@ var (
 func init() {
 	amino := codec.NewLegacyAmino()
 	interfaceRegistry := ctypes.NewInterfaceRegistry()
+	brochain.RegisterInterfaces(interfaceRegistry)
+	fabric.RegisterInterfaces(interfaceRegistry)
+	tendermint.RegisterInterfaces(interfaceRegistry)
+	wutong.RegisterInterfaces(interfaceRegistry)
+	bcos.RegisterInterfaces(interfaceRegistry)
+	record.RegisterInterfaces(interfaceRegistry)
 	moduleBasics.RegisterInterfaces(interfaceRegistry)
 	sdk.RegisterInterfaces(interfaceRegistry)
 	marshaler := codec.NewProtoCodec(interfaceRegistry)

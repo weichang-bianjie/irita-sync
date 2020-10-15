@@ -4,7 +4,7 @@ import (
 	. "github.com/bianjieai/irita-sync/msgs"
 	"github.com/bianjieai/irita-sync/msgs/ibc/record"
 	"github.com/bianjieai/irita-sync/libs/cdc"
-	"gitlab.bianjie.ai/cschain/cschain/modules/ibc/types"
+	"gitlab.bianjie.ai/cschain/cschain/modules/ibc/core/types"
 	"github.com/bianjieai/irita-sync/utils"
 )
 

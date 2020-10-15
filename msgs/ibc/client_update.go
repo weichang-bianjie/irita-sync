@@ -22,7 +22,9 @@ func (m *DocMsgUpdateClient) BuildMsg(v interface{}) {
 
 	m.ClientID = msg.ClientID
 	m.Signer = msg.Signer.String()
-	m.Header = models.Any{TypeUrl: msg.Header.GetTypeUrl(), Value: string(msg.Header.GetValue())}
+	if msg.Header != nil {
+		m.Header = models.Any{TypeUrl: msg.Header.GetTypeUrl(), Value: string(msg.Header.GetValue())}
+	}
 }
 
 func (m *DocMsgUpdateClient) HandleTxMsg(v SdkMsg) MsgDocInfo {

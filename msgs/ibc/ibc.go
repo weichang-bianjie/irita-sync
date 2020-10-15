@@ -12,10 +12,8 @@ import (
 func HandleTxMsg(v types.Msg) (MsgDocInfo, models.Record, bool) {
 	var (
 		msgDocInfo MsgDocInfo
-		//ibcClient  models.IbcClient
 	)
 	ok := true
-	//ibcClient.UpdateAt = timestamp
 	switch v.Type() {
 	case new(MsgRecvPacket).Type():
 		docMsg := DocMsgRecvPacket{}

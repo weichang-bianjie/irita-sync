@@ -23,8 +23,12 @@ func (m *DocMsgCreateClient) BuildMsg(v interface{}) {
 
 	m.ClientID = msg.ClientID
 	m.Signer = msg.Signer.String()
-	m.ClientState = models.Any{TypeUrl: msg.ClientState.GetTypeUrl(), Value: string(msg.ClientState.GetValue())}
-	m.ConsensusState = models.Any{TypeUrl: msg.ConsensusState.GetTypeUrl(), Value: string(msg.ConsensusState.GetValue())}
+	if msg.ConsensusState != nil {
+		m.ClientState = models.Any{TypeUrl: msg.ClientState.GetTypeUrl(), Value: string(msg.ClientState.GetValue())}
+	}
+	if msg.ClientState != nil {
+		m.ConsensusState = models.Any{TypeUrl: msg.ConsensusState.GetTypeUrl(), Value: string(msg.ConsensusState.GetValue())}
+	}
 
 }
 
