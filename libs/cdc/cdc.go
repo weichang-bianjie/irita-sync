@@ -25,6 +25,8 @@ import (
 	ctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/std"
+	"gitlab.bianjie.ai/cschain/cschain/modules/ibc-record"
+	"gitlab.bianjie.ai/cschain/cschain/modules/ibc"
 )
 
 var (
@@ -47,9 +49,8 @@ var (
 		coinswap.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		random.AppModuleBasic{},
-		//admin.AppModuleBasic{},
-		//validator.AppModuleBasic{},
-		//iritaslash.AppModuleBasic{},
+		ibc.AppModuleBasic{},
+		ibc_record.AppModuleBasic{},
 	)
 )
 
