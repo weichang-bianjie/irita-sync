@@ -71,12 +71,12 @@ func (d Tx) Name() string {
 func (d Tx) EnsureIndexes() {
 	var indexes []mgo.Index
 	indexes = append(indexes, mgo.Index{
-		Key:        []string{"-tx_hash"},
+		Key:        []string{"-hash"},
 		Unique:     true,
 		Background: true,
 	})
 	indexes = append(indexes, mgo.Index{
-		Key:        []string{"-height"},
+		Key:        []string{"-block_height"},
 		Unique:     true,
 		Background: true,
 	})

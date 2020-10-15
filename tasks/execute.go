@@ -295,7 +295,7 @@ func getBlockChainLatestHeight() (int64, error) {
 
 func saveDocsWithTxn(blockDoc *models.Block, txDocs []*models.Tx, taskDoc models.SyncTask, opsDoc []txn.Op) error {
 	var (
-		ops, binanceTxsOps []txn.Op
+		ops, txsOps []txn.Op
 	)
 
 	if blockDoc.Height == 0 {
@@ -309,15 +309,13 @@ func saveDocsWithTxn(blockDoc *models.Block, txDocs []*models.Tx, taskDoc models
 	}
 
 	if length := len(txDocs); length > 0 {
-
-		binanceTxsOps = make([]txn.Op, 0, length)
 		for _, v := range txDocs {
 			op := txn.Op{
 				C:      models.TxModel.Name(),
 				Id:     bson.NewObjectId(),
 				Insert: v,
 			}
-			binanceTxsOps = append(binanceTxsOps, op)
+			txsOps = append(txsOps, op)
 		}
 	}
 
@@ -333,9 +331,9 @@ func saveDocsWithTxn(blockDoc *models.Block, txDocs []*models.Tx, taskDoc models
 			},
 		},
 	}
+	ops = append(ops, txsOps...)
+	ops = append(ops, blockOp, updateOp)
 
-	ops = make([]txn.Op, 0, len(binanceTxsOps)+2)
-	ops = append(append(ops, blockOp, updateOp), binanceTxsOps...)
 	if len(opsDoc) > 0 {
 		ops = append(ops, opsDoc...)
 	}

@@ -68,7 +68,7 @@ func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block, txIndex int) 
 
 	Tx, err := cdc.GetTxDecoder()(txBytes)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("TxDecoder have error", logger.String("err", err.Error()), logger.Int64("height", block.Height))
 		return docTx, txnOps
 	}
 	height := block.Height
