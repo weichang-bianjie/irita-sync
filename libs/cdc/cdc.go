@@ -5,27 +5,27 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	//"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/irisnet/irismod/modules/nft"
-	"github.com/irisnet/irismod/modules/record"
-	"github.com/irisnet/irismod/modules/service"
-	"github.com/irisnet/irismod/modules/token"
-	"github.com/irisnet/irismod/modules/htlc"
-	"github.com/irisnet/irismod/modules/coinswap"
-	"github.com/irisnet/irismod/modules/random"
-	"github.com/irisnet/irismod/modules/oracle"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/evidence"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
+	//"github.com/irisnet/irismod/modules/record"
+	//"github.com/irisnet/irismod/modules/service"
+	//"github.com/irisnet/irismod/modules/token"
+	//"github.com/irisnet/irismod/modules/htlc"
+	//"github.com/irisnet/irismod/modules/coinswap"
+	//"github.com/irisnet/irismod/modules/random"
+	//"github.com/irisnet/irismod/modules/oracle"
+	//"github.com/cosmos/cosmos-sdk/x/distribution"
+	//"github.com/cosmos/cosmos-sdk/x/gov"
+	//"github.com/cosmos/cosmos-sdk/x/slashing"
+	//"github.com/cosmos/cosmos-sdk/x/staking"
+	//"github.com/cosmos/cosmos-sdk/x/evidence"
+	//"github.com/cosmos/cosmos-sdk/x/crisis"
 	"gitlab.bianjie.ai/irita-pro/iritamod/modules/identity"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	ctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/std"
-	"gitlab.bianjie.ai/cschain/cschain/modules/ibc-record"
+	ibcrecord "gitlab.bianjie.ai/cschain/cschain/modules/ibc-record"
 	"gitlab.bianjie.ai/cschain/cschain/modules/ibc"
 )
 
@@ -33,24 +33,24 @@ var (
 	encodecfg    params.EncodingConfig
 	moduleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		bank.AppModuleBasic{},
-		service.AppModuleBasic{},
+		//bank.AppModuleBasic{},
+		//service.AppModuleBasic{},
 		nft.AppModuleBasic{},
-		record.AppModuleBasic{},
-		token.AppModuleBasic{},
-		gov.AppModuleBasic{},
-		staking.AppModuleBasic{},
-		distribution.AppModuleBasic{},
-		slashing.AppModuleBasic{},
-		evidence.AppModuleBasic{},
-		crisis.AppModuleBasic{},
+		//record.AppModuleBasic{},
+		//token.AppModuleBasic{},
+		//gov.AppModuleBasic{},
+		//staking.AppModuleBasic{},
+		//distribution.AppModuleBasic{},
+		//slashing.AppModuleBasic{},
+		//evidence.AppModuleBasic{},
+		//crisis.AppModuleBasic{},
 		identity.AppModuleBasic{},
-		htlc.AppModuleBasic{},
-		coinswap.AppModuleBasic{},
-		oracle.AppModuleBasic{},
-		random.AppModuleBasic{},
+		//htlc.AppModuleBasic{},
+		//coinswap.AppModuleBasic{},
+		//oracle.AppModuleBasic{},
+		//random.AppModuleBasic{},
 		ibc.AppModuleBasic{},
-		ibc_record.AppModuleBasic{},
+		ibcrecord.AppModuleBasic{},
 	)
 )
 

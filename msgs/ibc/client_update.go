@@ -18,7 +18,7 @@ func (m *DocMsgUpdateClient) GetType() string {
 }
 
 func (m *DocMsgUpdateClient) BuildMsg(v interface{}) {
-	msg := v.(MsgUpdateClient)
+	msg := v.(*MsgUpdateClient)
 
 	m.ClientID = msg.ClientID
 	m.Signer = msg.Signer.String()
