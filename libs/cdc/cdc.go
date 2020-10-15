@@ -32,6 +32,7 @@ import (
 	wutong "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/wutong/types"
 	bcos "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/bcos/types"
 	record "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record/types"
+	ibcrecord "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record"
 )
 
 var (
@@ -55,7 +56,7 @@ var (
 		//oracle.AppModuleBasic{},
 		//random.AppModuleBasic{},
 		ibc.AppModuleBasic{},
-		//ibcrecord.AppModuleBasic{},
+		ibcrecord.AppModuleBasic{},
 	)
 )
 
@@ -86,6 +87,6 @@ func GetTxDecoder() sdk.TxDecoder {
 	return encodecfg.TxConfig.TxDecoder()
 }
 
-func GetAmino() *codec.LegacyAmino {
-	return encodecfg.Amino
+func GetMarshaler() codec.Marshaler {
+	return encodecfg.Marshaler
 }

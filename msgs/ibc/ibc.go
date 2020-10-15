@@ -22,10 +22,10 @@ func HandleTxMsg(v types.Msg) (MsgDocInfo, models.Record, bool) {
 		//packet
 		ibcRecord := docMsg.Packet.Data
 		recordData.Creator = docMsg.Signer
-		recordData.Contents = loadContents(ibcRecord.Value.Contents)
+		recordData.Contents = loadContents(ibcRecord.Contents)
 
-		recordData.Source.BlockHeight = int64(ibcRecord.Value.Height)
-		recordData.Source.TxHash = ibcRecord.Value.TxHash
+		recordData.Source.BlockHeight = int64(ibcRecord.Height)
+		recordData.Source.TxHash = ibcRecord.TxHash
 		//record.Source.Creator = ibcRecord.Value.Creator //nft data source not exist this segment
 		recordData.Source.Locality = docMsg.ClientID
 
