@@ -32,12 +32,12 @@ func HandleTxMsg(v types.Msg) (MsgDocInfo, models.Record, bool) {
 		md5Feed, _ := json.Marshal(recordData.Source)
 		recordData.Id = utils.Md5(string(md5Feed))
 		return msgDocInfo, recordData, ok
-	//case new(MsgCreateClient).Type():
-	//	docMsg := DocMsgCreateClient{}
-	//	msgDocInfo = docMsg.HandleTxMsg(v)
-	//case new(MsgUpdateClient).Type():
-	//	docMsg := DocMsgUpdateClient{}
-	//	msgDocInfo = docMsg.HandleTxMsg(v)
+	case new(MsgCreateClient).Type():
+		docMsg := DocMsgCreateClient{}
+		msgDocInfo = docMsg.HandleTxMsg(v)
+	case new(MsgUpdateClient).Type():
+		docMsg := DocMsgUpdateClient{}
+		msgDocInfo = docMsg.HandleTxMsg(v)
 	default:
 		ok = false
 	}

@@ -2,14 +2,14 @@ package ibc
 
 import (
 	. "github.com/bianjieai/irita-sync/msgs"
-	"github.com/bianjieai/irita-sync/utils"
-	"github.com/bianjieai/irita-sync/models"
+	"gitlab.bianjie.ai/cschain/cschain/modules/ibc/core/types"
+	"encoding/json"
 )
 
 // MsgUpdateClient defines a message to update an IBC client
 type DocMsgUpdateClient struct {
 	ClientID string     `bson:"client_id" yaml:"client_id"`
-	Header   models.Any `bson:"header" yaml:"header"`
+	Header   interface{} `bson:"header" yaml:"header"`
 	Signer   string     `bson:"signer" yaml:"signer"`
 }
 
@@ -22,19 +22,19 @@ func (m *DocMsgUpdateClient) BuildMsg(v interface{}) {
 
 	m.ClientID = msg.ClientID
 	m.Signer = msg.Signer.String()
-	if msg.Header != nil {
-		m.Header = models.Any{TypeUrl: msg.Header.GetTypeUrl(), Value: string(msg.Header.GetValue())}
+	if header, err := types.UnpackHeader(msg.Header); err == nil {
+		data, _ := json.Marshal(header)
+		m.Header = string(data)
 	}
+
 }
 
 func (m *DocMsgUpdateClient) HandleTxMsg(v SdkMsg) MsgDocInfo {
 	var (
 		addrs []string
-		msg   MsgUpdateClient
 	)
 
-	utils.UnMarshalJsonIgnoreErr(utils.MarshalJsonIgnoreErr(v), &msg)
-	addrs = append(addrs, msg.Signer.String())
+
 	handler := func() (Msg, []string) {
 		return m, addrs
 	}

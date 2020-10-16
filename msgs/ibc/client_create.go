@@ -2,15 +2,15 @@ package ibc
 
 import (
 	. "github.com/bianjieai/irita-sync/msgs"
-	"github.com/bianjieai/irita-sync/utils"
-	"github.com/bianjieai/irita-sync/models"
+	"gitlab.bianjie.ai/cschain/cschain/modules/ibc/core/types"
+	"encoding/json"
 )
 
 // MsgCreateClient defines a message to create an IBC client
 type DocMsgCreateClient struct {
 	ClientID       string     `bson:"client_id" yaml:"client_id"`
-	ClientState    models.Any `bson:"client_state"`
-	ConsensusState models.Any `bson:"consensus_state"`
+	ClientState    interface{} `bson:"client_state"`
+	ConsensusState interface{} `bson:"consensus_state"`
 	Signer         string     `bson:"signer" yaml:"signer"`
 }
 
@@ -23,11 +23,14 @@ func (m *DocMsgCreateClient) BuildMsg(v interface{}) {
 
 	m.ClientID = msg.ClientID
 	m.Signer = msg.Signer.String()
-	if msg.ConsensusState != nil {
-		m.ClientState = models.Any{TypeUrl: msg.ClientState.GetTypeUrl(), Value: string(msg.ClientState.GetValue())}
+	if clientState, err := types.UnpackClientState(msg.ClientState); err == nil {
+		data, _ := json.Marshal(clientState)
+		m.ClientState = string(data)
 	}
-	if msg.ClientState != nil {
-		m.ConsensusState = models.Any{TypeUrl: msg.ConsensusState.GetTypeUrl(), Value: string(msg.ConsensusState.GetValue())}
+
+	if consensusState, err := types.UnpackConsensusState(msg.ConsensusState); err == nil {
+		data, _ := json.Marshal(consensusState)
+		m.ConsensusState = string(data)
 	}
 
 }
@@ -35,11 +38,8 @@ func (m *DocMsgCreateClient) BuildMsg(v interface{}) {
 func (m *DocMsgCreateClient) HandleTxMsg(v SdkMsg) MsgDocInfo {
 	var (
 		addrs []string
-		msg   MsgCreateClient
 	)
 
-	utils.UnMarshalJsonIgnoreErr(utils.MarshalJsonIgnoreErr(v), &msg)
-	addrs = append(addrs, msg.Signer.String())
 	handler := func() (Msg, []string) {
 		return m, addrs
 	}
