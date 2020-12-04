@@ -36,6 +36,7 @@ type (
 		DocTxMsgs   []DocTxMsg `bson:"msgs"`
 		Signers     []string   `bson:"signers"`
 		Addrs       []string   `bson:"addrs"`
+		TxIndex     uint32     `bson:"tx_index"` // sequence tx of this block
 	}
 
 	Event struct {
@@ -76,7 +77,7 @@ func (d Tx) EnsureIndexes() {
 		Background: true,
 	})
 	indexes = append(indexes, mgo.Index{
-		Key:        []string{"-block_height"},
+		Key:        []string{"-block_height", "-tx_index"},
 		Unique:     true,
 		Background: true,
 	})

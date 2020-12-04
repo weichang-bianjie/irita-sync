@@ -22,7 +22,7 @@ func (m *DocMsgCreateClient) BuildMsg(v interface{}) {
 	msg := v.(*MsgCreateClient)
 
 	m.ClientID = msg.ClientID
-	m.Signer = msg.Signer.String()
+	m.Signer = msg.Signer
 	if clientState, err := types.UnpackClientState(msg.ClientState); err == nil {
 		data, _ := json.Marshal(clientState)
 		m.ClientState = string(data)

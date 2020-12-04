@@ -2,6 +2,7 @@ package cdc
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -20,19 +21,18 @@ import (
 	//"github.com/cosmos/cosmos-sdk/x/staking"
 	//"github.com/cosmos/cosmos-sdk/x/evidence"
 	//"github.com/cosmos/cosmos-sdk/x/crisis"
-	"gitlab.bianjie.ai/irita-pro/iritamod/modules/identity"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	"github.com/bianjieai/iritamod/modules/identity"
 	ctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
-	"github.com/cosmos/cosmos-sdk/std"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	ibcrecord "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record"
+	record "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record/types"
 	ibc "gitlab.bianjie.ai/cschain/cschain/modules/ibc/core"
+	bcos "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/bcos/types"
 	brochain "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/brochain/types"
 	fabric "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/fabric/types"
 	tendermint "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/tendermint/types"
 	wutong "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/wutong/types"
-	bcos "gitlab.bianjie.ai/cschain/cschain/modules/ibc/light-clients/bcos/types"
-	record "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record/types"
-	ibcrecord "gitlab.bianjie.ai/cschain/cschain/modules/ibc/applications/record"
 )
 
 var (
@@ -71,9 +71,12 @@ func init() {
 	bcos.RegisterInterfaces(interfaceRegistry)
 	record.RegisterInterfaces(interfaceRegistry)
 	moduleBasics.RegisterInterfaces(interfaceRegistry)
+	moduleBasics.RegisterLegacyAminoCodec(amino)
+	std.RegisterInterfaces(interfaceRegistry)
+	std.RegisterLegacyAminoCodec(amino)
 	sdk.RegisterInterfaces(interfaceRegistry)
 	marshaler := codec.NewProtoCodec(interfaceRegistry)
-	txCfg := tx.NewTxConfig(marshaler, std.DefaultPublicKeyCodec{}, tx.DefaultSignModes)
+	txCfg := tx.NewTxConfig(marshaler, tx.DefaultSignModes)
 
 	encodecfg = params.EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,

@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/bianjieai/irita-sync/models"
 	. "github.com/bianjieai/irita-sync/msgs"
-	idtypes "gitlab.bianjie.ai/irita-pro/iritamod/modules/identity/types"
+	idtypes "github.com/bianjieai/iritamod/modules/identity/types"
 )
 
 func HandleTxMsg(v types.Msg) (MsgDocInfo, models.Identity, bool) {

@@ -21,7 +21,7 @@ func (m *DocMsgUpdateClient) BuildMsg(v interface{}) {
 	msg := v.(*MsgUpdateClient)
 
 	m.ClientID = msg.ClientID
-	m.Signer = msg.Signer.String()
+	m.Signer = msg.Signer
 	if header, err := types.UnpackHeader(msg.Header); err == nil {
 		data, _ := json.Marshal(header)
 		m.Header = string(data)
