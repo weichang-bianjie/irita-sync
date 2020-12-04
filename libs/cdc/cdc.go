@@ -1,6 +1,8 @@
 package cdc
 
 import (
+	"github.com/bianjieai/iritamod/modules/admin"
+	iritaparams "github.com/bianjieai/iritamod/modules/params"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -57,6 +59,8 @@ var (
 		//random.AppModuleBasic{},
 		ibc.AppModuleBasic{},
 		ibcrecord.AppModuleBasic{},
+		admin.AppModuleBasic{},
+		iritaparams.AppModuleBasic{},
 	)
 )
 
