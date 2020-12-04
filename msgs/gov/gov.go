@@ -1,15 +1,14 @@
 package gov
 
 import (
-	. "github.com/bianjieai/irita-sync/msgs"
 	"github.com/bianjieai/irita-sync/models"
-	"encoding/json"
+	. "github.com/bianjieai/irita-sync/msgs"
 )
 
 type DocTxMsgSubmitProposal struct {
 	Proposer       string        `bson:"proposer"`        //  Address of the proposer
 	InitialDeposit []models.Coin `bson:"initial_deposit"` //  Initial deposit paid by sender. Must be strictly positive.
-	Content        string        `bson:"content"`
+	Content        interface{}   `bson:"content"`
 }
 
 func (doctx *DocTxMsgSubmitProposal) GetType() string {
@@ -18,8 +17,7 @@ func (doctx *DocTxMsgSubmitProposal) GetType() string {
 
 func (doctx *DocTxMsgSubmitProposal) BuildMsg(txMsg interface{}) {
 	msg := txMsg.(*MsgSubmitProposal)
-	content, _ := json.Marshal(msg.Content)
-	doctx.Content = string(content)
+	doctx.Content = msg.GetContent()
 	doctx.Proposer = msg.Proposer
 	doctx.InitialDeposit = models.BuildDocCoins(msg.InitialDeposit)
 }
@@ -44,7 +42,7 @@ func (m *DocTxMsgSubmitProposal) HandleTxMsg(v SdkMsg) MsgDocInfo {
 type DocTxMsgVote struct {
 	ProposalID uint64 `bson:"proposal_id"` // ID of the proposal
 	Voter      string `bson:"voter"`       //  address of the voter
-	Option     string `bson:"option"`      //  option from OptionSet chosen by the voter
+	Option     int32  `bson:"option"`      //  option from OptionSet chosen by the voter
 }
 
 func (doctx *DocTxMsgVote) GetType() string {
@@ -54,7 +52,7 @@ func (doctx *DocTxMsgVote) GetType() string {
 func (doctx *DocTxMsgVote) BuildMsg(txMsg interface{}) {
 	msg := txMsg.(*MsgVote)
 	doctx.Voter = msg.Voter
-	doctx.Option = msg.Option.String()
+	doctx.Option = int32(msg.Option)
 	doctx.ProposalID = msg.ProposalId
 }
 
