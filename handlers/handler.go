@@ -7,6 +7,7 @@ import (
 	"github.com/bianjieai/irita-sync/msgs/distribution"
 	"github.com/bianjieai/irita-sync/msgs/evidence"
 	"github.com/bianjieai/irita-sync/msgs/gov"
+	"github.com/bianjieai/irita-sync/msgs/ibc"
 	"github.com/bianjieai/irita-sync/msgs/nft"
 	"github.com/bianjieai/irita-sync/msgs/record"
 	"github.com/bianjieai/irita-sync/msgs/service"
@@ -75,10 +76,10 @@ func HandleTxMsg(v types.Msg) (MsgDocInfo, []txn.Op) {
 	if WasmDocInfo, ok := wasm.HandleTxMsg(v); ok {
 		return WasmDocInfo, nil
 	}
-	//if IbcDocinfo, ok := ibc.HandleTxMsg(v); ok {
-	//	//ops := handlerIbcClient(IbcDocinfo.DocTxMsg.Type, ibcClient)
-	//	return IbcDocinfo, nil
-	//}
+	if IbcDocinfo, ok := ibc.HandleTxMsg(v); ok {
+		//ops := handlerIbcClient(IbcDocinfo.DocTxMsg.Type, ibcClient)
+		return IbcDocinfo, nil
+	}
 	return MsgDocInfo{}, nil
 }
 

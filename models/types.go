@@ -33,8 +33,8 @@ type (
 	}
 
 	Coin struct {
-		Denom  string `bson:"denom"`
-		Amount string `bson:"amount"`
+		Denom  string `bson:"denom" json:"denom"`
+		Amount string `bson:"amount" json:"amount"`
 	}
 
 	Coins []*Coin
