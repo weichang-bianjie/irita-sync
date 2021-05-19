@@ -355,12 +355,37 @@ func saveDocsWithTxn(blockDoc *models.Block, txDocs []*models.Tx, taskDoc models
 		ops = append(ops, opsDoc...)
 	}
 
-	if len(ops) > 0 {
+	return batchSave(ops)
+}
+
+func batchSave(ops []txn.Op) error {
+	if len(ops) <= maxRecordNumForBatchInsert {
 		err := models.Txn(ops)
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 
+	if batchSize := len(ops); batchSize > 0 {
+		num := 1
+		if batchSize%maxRecordNumForBatchInsert > 0 {
+			num = batchSize/maxRecordNumForBatchInsert + 1
+		} else if batchSize%maxRecordNumForBatchInsert == 0 {
+			num = batchSize / maxRecordNumForBatchInsert
+		}
+		for i := 0; i < num; i++ {
+			start := i * maxRecordNumForBatchInsert
+			end := start + maxRecordNumForBatchInsert
+			if i == num-1 {
+				end = start + batchSize - i*maxRecordNumForBatchInsert
+			}
+			//fmt.Println(start, end)
+			err := models.Txn(ops[start:end])
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
