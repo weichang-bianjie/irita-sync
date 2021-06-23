@@ -13,4 +13,5 @@ const (
 	EnvNameBech32AccPrefix         = "BECH32_ACC_PREFIX"
 	EnvNameChainId                 = "CHAIN_ID"
 	EnvNameChainBlockInterval      = "CHAIN_BLOCK_INTERVAL"
+	EnvNamePromethousPort          = "PROMETHOUS_PORT"
 )

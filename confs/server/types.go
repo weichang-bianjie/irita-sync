@@ -21,6 +21,7 @@ type ServerConf struct {
 	Bech32AccPrefix    string
 	ChainId            string
 	ChainBlockInterval int
+	PromethousPort     int
 }
 
 var (
@@ -33,6 +34,7 @@ var (
 	bech32AccPrefix         = "iaa"
 	chainId                 = ""
 	chainBlockInterval      = 5
+	promethousPort          = 9090
 )
 
 // get value of env var
@@ -80,6 +82,13 @@ func init() {
 			chainBlockInterval = n
 		}
 	}
+	if v, ok := os.LookupEnv(constant.EnvNamePromethousPort); ok {
+		if n, err := utils.ConvStrToInt(v); err != nil {
+			logger.Fatal("convert str to int fail", logger.String(constant.EnvNamePromethousPort, v))
+		} else {
+			promethousPort = n
+		}
+	}
 
 	// calculate sleep time of create task goroutine, time unit is second
 	// 1. sleepTime must less than blockNumPerWorkerHandle*chainTimeInterval,
@@ -104,6 +113,7 @@ func init() {
 		Bech32AccPrefix:    bech32AccPrefix,
 		ChainId:            chainId,
 		ChainBlockInterval: chainBlockInterval,
+		PromethousPort:     promethousPort,
 	}
 
 	logger.Debug("print server config", logger.String("serverConf", utils.MarshalJsonIgnoreErr(SvrConf)))
