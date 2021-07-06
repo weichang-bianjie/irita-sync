@@ -3,12 +3,13 @@ module github.com/bianjieai/irita-sync
 go 1.14
 
 require (
-	github.com/cosmos/cosmos-sdk v0.38.1
-	github.com/irisnet/irismod v1.1.0
+	github.com/cosmos/cosmos-sdk v0.40.0-rc3
 	github.com/jolestar/go-commons-pool v2.0.0+incompatible
-	github.com/tendermint/tendermint v0.34.0-rc3.0.20200907055413-3359e0bf2f84
-	gitlab.bianjie.ai/cschain/cschain v1.1.1-0.20201015031913-928bf6f994b0
-	gitlab.bianjie.ai/irita-pro/iritamod v1.1.0
+	github.com/kaifei-bianjie/msg-parser v0.0.0-20210218040200-975d3d08760b
+	github.com/spf13/viper v1.7.1
+	github.com/tendermint/tendermint v0.34.0-rc6
+	github.com/weichang-bianjie/metric-sdk v1.0.0
+	gitlab.bianjie.ai/irita-pro/iritamod v1.1.0 // indirect
 	go.uber.org/zap v1.15.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
