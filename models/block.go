@@ -12,11 +12,11 @@ const (
 
 type (
 	Block struct {
-		Height   int64  `bson:"height"`
-		Hash     string `bson:"hash"`
-		Txn      int64  `bson:"txn"`
-		Time     int64  `bson:"time"`
-		Proposer string `bson:"proposer"`
+		Height   int64  `bson:"height" json:"height"`
+		Hash     string `bson:"hash" json:"hash"`
+		Txn      int64  `bson:"txn" json:"txn"`
+		Time     int64  `bson:"time" json:"time"`
+		Proposer string `bson:"proposer" json:"proposer"`
 	}
 )
 

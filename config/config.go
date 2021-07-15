@@ -25,21 +25,12 @@ type (
 	}
 
 	ServerConf struct {
-		NodeUrls                  string `mapstructure:"node_urls"`
-		WorkerNumCreateTask       int    `mapstructure:"worker_num_create_task"`
-		WorkerNumExecuteTask      int    `mapstructure:"worker_num_execute_task"`
-		WorkerMaxSleepTime        int    `mapstructure:"worker_max_sleep_time"`
-		BlockNumPerWorkerHandle   int    `mapstructure:"block_num_per_worker_handle"`
-		SleepTimeCreateTaskWorker int    `mapstructure:"sleep_time_create_task_worker"`
-
-		MaxConnectionNum   int    `mapstructure:"max_connection_num"`
-		InitConnectionNum  int    `mapstructure:"init_connection_num"`
-		ChainId            string `mapstructure:"chain_id"`
-		ChainBlockInterval int    `mapstructure:"chain_block_interval"`
-		BehindBlockNum     int    `mapstructure:"behind_block_num"`
-
-		PromethousPort    string `mapstructure:"promethous_port"`
-		OnlySupportModule string `mapstructure:"only_support_module"`
+		ChainId               string `mapstructure:"chain_id"`
+		WriteDir              string `mapstructure:"write_dir"`
+		FilePrefix            string `mapstructure:"file_prefix"`
+		PromethousPort        string `mapstructure:"promethous_port"`
+		OnlySupportModule     string `mapstructure:"only_support_module"`
+		ChainBlockResetHeight int64  `mapstructure:"chain_block_reset_height"`
 	}
 )
 
@@ -67,16 +58,6 @@ func ReadConfig() (*Config, error) {
 	if err := rootViper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
-
-	// calculate sleep time of create task goroutine, time unit is second
-	// 1. sleepTime must less than blockNumPerWorkerHandle*chainTimeInterval,
-	//    otherwise create task goroutine can't succeed create follow task
-	// 2. use value of sleepTime/5 to make create task worker do task in time
-	sleepTimeCreateTaskWorker := (cfg.Server.BlockNumPerWorkerHandle * cfg.Server.ChainBlockInterval) / 5
-	if sleepTimeCreateTaskWorker == 0 {
-		sleepTimeCreateTaskWorker = 1
-	}
-	cfg.Server.SleepTimeCreateTaskWorker = sleepTimeCreateTaskWorker
 
 	logger.Debug("config: " + utils.MarshalJsonIgnoreErr(cfg))
 

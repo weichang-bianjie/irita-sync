@@ -1,9 +1,7 @@
 package monitor
 
 import (
-	"context"
 	"github.com/bianjieai/irita-sync/libs/logger"
-	"github.com/bianjieai/irita-sync/libs/pool"
 	"github.com/bianjieai/irita-sync/models"
 	"github.com/bianjieai/irita-sync/monitor/metrics"
 	"os"
@@ -22,7 +20,6 @@ const (
 )
 
 type clientNode struct {
-	nodeStatus  metrics.Guage
 	nodeHeight  metrics.Guage
 	dbHeight    metrics.Guage
 	nodeTimeGap metrics.Guage
@@ -44,13 +41,13 @@ func NewMetricNode(server metrics.Monitor) clientNode {
 		"sync system database max block height",
 		nil,
 	)
-	nodeStatusMetric := metrics.NewGuage(
-		"sync",
-		"status",
-		"node_status",
-		"full node status(0:NotReachable,1:Syncing,2:CatchingUp)",
-		nil,
-	)
+	//nodeStatusMetric := metrics.NewGuage(
+	//	"sync",
+	//	"status",
+	//	"node_status",
+	//	"full node status(0:NotReachable,1:Syncing,2:CatchingUp)",
+	//	nil,
+	//)
 	nodeTimeGapMetric := metrics.NewGuage(
 		"sync",
 		"status",
@@ -65,14 +62,13 @@ func NewMetricNode(server metrics.Monitor) clientNode {
 		"sync task working status(0:CatchingUp 1:Following)",
 		nil,
 	)
-	server.RegisterMetrics(nodeHeightMetric, dbHeightMetric, nodeStatusMetric, nodeTimeGapMetric, syncWorkwayMetric)
+	server.RegisterMetrics(nodeHeightMetric, dbHeightMetric, nodeTimeGapMetric, syncWorkwayMetric)
 	nodeHeight, _ := metrics.CovertGuage(nodeHeightMetric)
 	dbHeight, _ := metrics.CovertGuage(dbHeightMetric)
-	nodeStatus, _ := metrics.CovertGuage(nodeStatusMetric)
+	//nodeStatus, _ := metrics.CovertGuage(nodeStatusMetric)
 	nodeTimeGap, _ := metrics.CovertGuage(nodeTimeGapMetric)
 	syncWorkway, _ := metrics.CovertGuage(syncWorkwayMetric)
 	return clientNode{
-		nodeStatus:  nodeStatus,
 		nodeHeight:  nodeHeight,
 		dbHeight:    dbHeight,
 		nodeTimeGap: nodeTimeGap,
@@ -90,15 +86,6 @@ func (node *clientNode) Report() {
 	}
 }
 func (node *clientNode) nodeStatusReport() {
-	client, err := pool.GetClientWithTimeout(10 * time.Second)
-	if err != nil {
-		logger.Error("rpc node connection exception", logger.String("error", err.Error()))
-		node.nodeStatus.Set(float64(NodeStatusNotReachable))
-		return
-	}
-	defer func() {
-		client.Release()
-	}()
 
 	block, err := new(models.Block).GetMaxBlockHeight()
 	if err != nil {
@@ -106,19 +93,6 @@ func (node *clientNode) nodeStatusReport() {
 	}
 
 	node.dbHeight.Set(float64(block.Height))
-	status, err := client.Status(context.Background())
-	if err != nil {
-		logger.Error("rpc node connection exception", logger.String("error", err.Error()))
-		node.nodeStatus.Set(float64(NodeStatusNotReachable))
-		//return
-	} else {
-		if status.SyncInfo.CatchingUp {
-			node.nodeStatus.Set(float64(NodeStatusCatchingUp))
-		} else {
-			node.nodeStatus.Set(float64(NodeStatusSyncing))
-		}
-		node.nodeHeight.Set(float64(status.SyncInfo.LatestBlockHeight))
-	}
 
 	follow, err := new(models.SyncTask).QueryValidFollowTasks()
 	if err != nil {

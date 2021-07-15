@@ -2,25 +2,19 @@ package handlers
 
 import (
 	"github.com/bianjieai/irita-sync/config"
-	"github.com/bianjieai/irita-sync/libs/pool"
 	"github.com/bianjieai/irita-sync/utils"
 	"testing"
 )
 
 func TestParseTxs(t *testing.T) {
-	block := int64(1097850)
+	block := int64(2)
 	conf, err := config.ReadConfig()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	InitRouter(conf)
-	pool.Init(conf)
-	c := pool.GetClient()
-	defer func() {
-		c.Release()
-	}()
 
-	if blockDoc, txDocs, _, err := ParseBlockAndTxs(block, c); err != nil {
+	if blockDoc, txDocs, _, err := ParseBlockAndTxs(block, conf); err != nil {
 		t.Fatal(err)
 	} else {
 		t.Log(utils.MarshalJsonIgnoreErr(blockDoc))
