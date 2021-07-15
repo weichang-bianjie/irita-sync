@@ -1,22 +1,21 @@
 package handlers
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/bianjieai/irita-sync/config"
 	"github.com/bianjieai/irita-sync/libs/logger"
 	"github.com/bianjieai/irita-sync/libs/msgparser"
-	"github.com/bianjieai/irita-sync/libs/pool"
 	"github.com/bianjieai/irita-sync/models"
 	"github.com/bianjieai/irita-sync/utils"
 	"github.com/bianjieai/irita-sync/utils/constant"
 	"github.com/kaifei-bianjie/msg-parser/codec"
 	msgsdktypes "github.com/kaifei-bianjie/msg-parser/types"
 	aTypes "github.com/tendermint/tendermint/abci/types"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/types"
-	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2/txn"
+	"io/ioutil"
 	"strings"
-	"time"
 )
 
 var _parser msgparser.MsgParser
@@ -47,40 +46,36 @@ func InitRouter(conf *config.Config) {
 	Init(conf)
 }
 
-func ParseBlockAndTxs(b int64, client *pool.Client) (*models.Block, []*models.Tx, []txn.Op, error) {
+func ParseBlockAndTxs(b int64, conf *config.Config) (*models.Block, []*models.Tx, []txn.Op, error) {
 	var (
 		blockDoc models.Block
-		block    *ctypes.ResultBlock
 		txnOps   []txn.Op
+		txs      []*models.Tx
 	)
-	ctx := context.Background()
-	if v, err := client.Block(ctx, &b); err != nil {
-		time.Sleep(1 * time.Second)
-		if v2, err := client.Block(ctx, &b); err != nil {
-			return &blockDoc, nil, txnOps, utils.ConvertErr(b, "", "ParseBlock", err)
-		} else {
-			block = v2
-		}
-	} else {
-		block = v
+	blockfile := fmt.Sprintf("%v/%v_%v_block", conf.Server.WriteDir, conf.Server.FilePrefix, b)
+	bytesblock, err := ioutil.ReadFile(blockfile)
+	if err != nil {
+		return &blockDoc, nil, nil, err
 	}
-	blockDoc = models.Block{
-		Height:   block.Block.Height,
-		Time:     block.Block.Time.Unix(),
-		Hash:     block.Block.Header.Hash().String(),
-		Txn:      int64(len(block.Block.Data.Txs)),
-		Proposer: block.Block.ProposerAddress.String(),
-	}
+	utils.UnMarshalJsonIgnoreErr(string(bytesblock), &blockDoc)
 
-	txDocs := make([]*models.Tx, 0, len(block.Block.Txs))
-	if len(block.Block.Txs) > 0 {
-		for _, v := range block.Block.Txs {
-			txDoc, ops, err := parseTx(client, v, block.Block)
+	if blockDoc.Txn > 0 {
+		txs = make([]*models.Tx, 0, blockDoc.Txn)
+		txfile := fmt.Sprintf("%v/%v_%v_txs", conf.Server.WriteDir, conf.Server.FilePrefix, b)
+		txbytes, err := ioutil.ReadFile(txfile)
+		if err != nil {
+			return &blockDoc, nil, nil, err
+		}
+		var txsData Txs
+		utils.UnMarshalJsonIgnoreErr(string(txbytes), &txsData)
+		for i, v := range txsData.Txs {
+			tx, _ := hex.DecodeString(v.Tx)
+			txDoc, ops, err := parseTx(tx, v.TxResult, blockDoc, i)
 			if err != nil {
-				return &blockDoc, txDocs, txnOps, err
+				return &blockDoc, txs, txnOps, err
 			}
 			if txDoc.TxHash != "" && len(txDoc.Type) > 0 {
-				txDocs = append(txDocs, &txDoc)
+				txs = append(txs, &txDoc)
 				if len(ops) > 0 {
 					txnOps = append(txnOps, ops...)
 				}
@@ -88,38 +83,27 @@ func ParseBlockAndTxs(b int64, client *pool.Client) (*models.Block, []*models.Tx
 		}
 	}
 
-	return &blockDoc, txDocs, txnOps, nil
+	return &blockDoc, txs, txnOps, nil
 }
 
-func parseTx(c *pool.Client, txBytes types.Tx, block *types.Block) (models.Tx, []txn.Op, error) {
+func parseTx(txBytes types.Tx, txResult aTypes.ResponseDeliverTx, block models.Block, txIndex int) (models.Tx, []txn.Op, error) {
 	var (
-		docTx models.Tx
-
+		docTx     models.Tx
 		docTxMsgs []msgsdktypes.TxMsg
 		txnOps    []txn.Op
 	)
 	txHash := utils.BuildHex(txBytes.Hash())
-	ctx := context.Background()
-	txResult, err := c.Tx(ctx, txBytes.Hash(), false)
-	if err != nil {
-		time.Sleep(1 * time.Second)
-		if v, err := c.Tx(ctx, txBytes.Hash(), false); err != nil {
-			return docTx, txnOps, utils.ConvertErr(block.Height, txHash, "TxResult", err)
-		} else {
-			txResult = v
-		}
-	}
-	docTx.Time = block.Time.Unix()
-	docTx.Height = txResult.Height
+	docTx.Time = block.Time
+	docTx.Height = block.Height
 	docTx.TxHash = txHash
-	docTx.Status = parseTxStatus(txResult.TxResult.Code)
+	docTx.Status = parseTxStatus(txResult.Code)
 	if docTx.Status == constant.TxStatusFail {
-		docTx.Log = txResult.TxResult.Log
+		docTx.Log = txResult.Log
 	}
 
-	docTx.Events = parseEvents(txResult.TxResult.Events)
-	docTx.EventsNew = parseABCILogs(txResult.TxResult.Log)
-	docTx.TxIndex = txResult.Index
+	docTx.Events = parseEvents(txResult.Events)
+	docTx.EventsNew = parseABCILogs(txResult.Log)
+	docTx.TxIndex = uint32(txIndex)
 
 	authTx, err := codec.GetSigningTx(txBytes)
 	if err != nil {
