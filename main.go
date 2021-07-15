@@ -5,6 +5,7 @@ import (
 	"github.com/bianjieai/irita-sync/handlers"
 	"github.com/bianjieai/irita-sync/libs/logger"
 	"github.com/bianjieai/irita-sync/models"
+	"github.com/bianjieai/irita-sync/monitor"
 	"github.com/bianjieai/irita-sync/tasks"
 	"os"
 	"os/signal"
@@ -32,7 +33,8 @@ func main() {
 	}
 	models.Init(conf)
 	handlers.InitRouter(conf)
-	tasks.Start(conf)
+	go tasks.Start(conf)
+	go monitor.Start()
 
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 

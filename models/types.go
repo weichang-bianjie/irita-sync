@@ -7,12 +7,10 @@ const (
 )
 
 var (
-	SyncTaskModel SyncTask
 	BlockModel    Block
 	TxModel       Tx
 
 	Collections = []Docs{
-		SyncTaskModel,
 		BlockModel,
 		TxModel,
 	}
