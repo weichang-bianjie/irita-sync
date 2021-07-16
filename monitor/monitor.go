@@ -41,13 +41,21 @@ func NewMetricNode(server metrics.Monitor) clientNode {
 		"the seconds gap between node block time with sync db block time",
 		nil,
 	)
-
-	server.RegisterMetrics(dbHeightMetric, nodeTimeGapMetric)
+	syncWorkwayMetric := metrics.NewGuage(
+		"sync",
+		"",
+		"task_working_status",
+		"sync task working status(0:CatchingUp 1:Following)",
+		nil,
+	)
+	server.RegisterMetrics(dbHeightMetric, nodeTimeGapMetric, syncWorkwayMetric)
 	dbHeight, _ := metrics.CovertGuage(dbHeightMetric)
 	nodeTimeGap, _ := metrics.CovertGuage(nodeTimeGapMetric)
+	syncWorkway, _ := metrics.CovertGuage(syncWorkwayMetric)
 	return clientNode{
 		dbHeight:    dbHeight,
 		nodeTimeGap: nodeTimeGap,
+		syncWorkWay: syncWorkway,
 	}
 }
 
@@ -69,9 +77,21 @@ func (node *clientNode) nodeStatusReport() {
 
 	node.dbHeight.Set(float64(block.Height))
 
-	timeGap := time.Now().Unix() - block.Time
-	node.nodeTimeGap.Set(float64(timeGap))
+	follow, err := new(models.SyncTask).QueryValidFollow()
+	if err != nil {
+		logger.Error("query valid follow task exception", logger.String("error", err.Error()))
+		return
+	}
+	if follow && block.Time > 0 {
+		timeGap := time.Now().Unix() - block.Time
+		node.nodeTimeGap.Set(float64(timeGap))
+	}
 
+	if follow {
+		node.syncWorkWay.Set(float64(SyncTaskFollowing))
+	} else {
+		node.syncWorkWay.Set(float64(SyncTaskCatchingUp))
+	}
 	return
 }
 

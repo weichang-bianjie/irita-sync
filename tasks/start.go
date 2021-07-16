@@ -16,22 +16,21 @@ import (
 )
 
 func Start(conf *config.Config) {
-	go func(conf *config.Config) {
 
-		heightChan := make(chan int64)
-		go getHeightTask(heightChan, conf)
+	heightChan := make(chan int64)
+	go getHeightTask(heightChan, conf)
+	models.SyncTaskModel.Create()
 
-		for {
-			select {
-			case height, ok := <-heightChan:
-				if ok {
-					parseBlockAndSave(height, conf)
-				}
-
+	for {
+		select {
+		case height, ok := <-heightChan:
+			if ok {
+				parseBlockAndSave(height, conf)
 			}
 
 		}
-	}(conf)
+
+	}
 
 }
 
@@ -57,12 +56,14 @@ func getHeightTask(chanHeight chan int64, conf *config.Config) {
 			continue
 		}
 		if !exist {
+			models.SyncTaskModel.Update(models.SyncTaskStatusUnderway)
 			logger.Info("wait blockChain latest height update",
 				logger.Int64("curSyncedHeight", inProcessBlock-1),
 				logger.Int64("blockChainLatestHeight", inProcessBlock))
 			time.Sleep(1 * time.Second)
 			continue
 		} else {
+			models.SyncTaskModel.Update(models.SyncTaskStatusCatchUping)
 			chanHeight <- inProcessBlock
 			inProcessBlock++
 		}
