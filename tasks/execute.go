@@ -1,26 +1,22 @@
 package tasks
 
 import (
-	"context"
 	"fmt"
 	"github.com/bianjieai/irita-sync/handlers"
 	"github.com/bianjieai/irita-sync/libs/logger"
-	"github.com/bianjieai/irita-sync/libs/pool"
 	"github.com/bianjieai/irita-sync/models"
 	"github.com/bianjieai/irita-sync/utils"
 	"github.com/bianjieai/irita-sync/utils/constant"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2/txn"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 )
 
 func (s *syncTaskService) StartExecuteTask() {
-	defer func() {
-		pool.ClosePool()
-	}()
 
 	var (
 		blockNumPerWorkerHandle = int64(s.conf.Server.BlockNumPerWorkerHandle)
@@ -56,7 +52,6 @@ func (s *syncTaskService) executeTask(blockNumPerWorkerHandle, maxWorkerSleepTim
 
 	healthCheckQuit := make(chan bool)
 	//workerId = genWorkerId()
-	client := pool.GetClient()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -64,7 +59,6 @@ func (s *syncTaskService) executeTask(blockNumPerWorkerHandle, maxWorkerSleepTim
 		}
 		close(healthCheckQuit)
 		<-chanLimit
-		client.Release()
 	}()
 
 	// check whether exist executable task
@@ -83,9 +77,9 @@ func (s *syncTaskService) executeTask(blockNumPerWorkerHandle, maxWorkerSleepTim
 	// take over sync task
 	// attempt to update status, worker_id and worker_logs
 	task := tasks[utils.RandInt(len(tasks))]
-	s.TakeOverTaskAndExecute(task, client, healthCheckQuit, blockNumPerWorkerHandle)
+	s.TakeOverTaskAndExecute(task, healthCheckQuit, blockNumPerWorkerHandle)
 }
-func (s *syncTaskService) TakeOverTaskAndExecute(task models.SyncTask, client *pool.Client, healthCheckQuit chan bool, blockNumPerWorkerHandle int64) {
+func (s *syncTaskService) TakeOverTaskAndExecute(task models.SyncTask, healthCheckQuit chan bool, blockNumPerWorkerHandle int64) {
 	var taskType string
 	workerId := fmt.Sprintf("%v@%v", s.hostname, bson.NewObjectId().Hex())
 	err := s.syncTaskModel.TakeOverTask(task, workerId)
@@ -183,7 +177,7 @@ func (s *syncTaskService) TakeOverTaskAndExecute(task models.SyncTask, client *p
 		}
 
 		// parse data from block
-		blockDoc, txDocs, ops, err := handlers.ParseBlockAndTxs(inProcessBlock, client)
+		blockDoc, txDocs, ops, err := handlers.ParseBlockAndTxs(inProcessBlock, s.conf)
 		if err != nil {
 			logger.Error("Parse block fail",
 				logger.Int64("height", inProcessBlock),
@@ -297,16 +291,14 @@ func assertTaskWorkerUnchanged(taskId bson.ObjectId, workerId string) (bool, err
 
 // get current block height
 func getBlockChainLatestHeight() (int64, error) {
-	client := pool.GetClient()
-	defer func() {
-		client.Release()
-	}()
-	status, err := client.Status(context.Background())
+	blockfile := fmt.Sprintf("%v/%v_latest_block", _conf.Server.WriteDir, _conf.Server.FilePrefix)
+	bytesblock, err := ioutil.ReadFile(blockfile)
 	if err != nil {
 		return 0, err
 	}
-
-	return status.SyncInfo.LatestBlockHeight, nil
+	var lastest handlers.LastestBlock
+	utils.UnMarshalJsonIgnoreErr(string(bytesblock), &lastest)
+	return lastest.Height, nil
 }
 
 func saveDocsWithTxn(blockDoc *models.Block, txDocs []*models.Tx, taskDoc models.SyncTask, opsDoc []txn.Op) error {

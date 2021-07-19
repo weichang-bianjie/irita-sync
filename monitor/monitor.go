@@ -1,9 +1,7 @@
 package monitor
 
 import (
-	"context"
 	"github.com/bianjieai/irita-sync/libs/logger"
-	"github.com/bianjieai/irita-sync/libs/pool"
 	"github.com/bianjieai/irita-sync/models"
 	"github.com/bianjieai/irita-sync/monitor/metrics"
 	"os"
@@ -90,15 +88,6 @@ func (node *clientNode) Report() {
 	}
 }
 func (node *clientNode) nodeStatusReport() {
-	client, err := pool.GetClientWithTimeout(10 * time.Second)
-	if err != nil {
-		logger.Error("rpc node connection exception", logger.String("error", err.Error()))
-		node.nodeStatus.Set(float64(NodeStatusNotReachable))
-		return
-	}
-	defer func() {
-		client.Release()
-	}()
 
 	block, err := new(models.Block).GetMaxBlockHeight()
 	if err != nil {
@@ -106,19 +95,6 @@ func (node *clientNode) nodeStatusReport() {
 	}
 
 	node.dbHeight.Set(float64(block.Height))
-	status, err := client.Status(context.Background())
-	if err != nil {
-		logger.Error("rpc node connection exception", logger.String("error", err.Error()))
-		node.nodeStatus.Set(float64(NodeStatusNotReachable))
-		//return
-	} else {
-		if status.SyncInfo.CatchingUp {
-			node.nodeStatus.Set(float64(NodeStatusCatchingUp))
-		} else {
-			node.nodeStatus.Set(float64(NodeStatusSyncing))
-		}
-		node.nodeHeight.Set(float64(status.SyncInfo.LatestBlockHeight))
-	}
 
 	follow, err := new(models.SyncTask).QueryValidFollowTasks()
 	if err != nil {

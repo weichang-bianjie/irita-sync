@@ -25,21 +25,20 @@ type (
 	}
 
 	ServerConf struct {
-		NodeUrls                  string `mapstructure:"node_urls"`
-		WorkerNumCreateTask       int    `mapstructure:"worker_num_create_task"`
-		WorkerNumExecuteTask      int    `mapstructure:"worker_num_execute_task"`
-		WorkerMaxSleepTime        int    `mapstructure:"worker_max_sleep_time"`
-		BlockNumPerWorkerHandle   int    `mapstructure:"block_num_per_worker_handle"`
-		SleepTimeCreateTaskWorker int    `mapstructure:"sleep_time_create_task_worker"`
+		WorkerNumCreateTask       int `mapstructure:"worker_num_create_task"`
+		WorkerNumExecuteTask      int `mapstructure:"worker_num_execute_task"`
+		WorkerMaxSleepTime        int `mapstructure:"worker_max_sleep_time"`
+		BlockNumPerWorkerHandle   int `mapstructure:"block_num_per_worker_handle"`
+		SleepTimeCreateTaskWorker int `mapstructure:"sleep_time_create_task_worker"`
 
-		MaxConnectionNum   int    `mapstructure:"max_connection_num"`
-		InitConnectionNum  int    `mapstructure:"init_connection_num"`
 		ChainId            string `mapstructure:"chain_id"`
 		ChainBlockInterval int    `mapstructure:"chain_block_interval"`
 		BehindBlockNum     int    `mapstructure:"behind_block_num"`
 
 		PromethousPort    string `mapstructure:"promethous_port"`
 		OnlySupportModule string `mapstructure:"only_support_module"`
+		WriteDir          string `mapstructure:"write_dir"`
+		FilePrefix        string `mapstructure:"file_prefix"`
 	}
 )
 

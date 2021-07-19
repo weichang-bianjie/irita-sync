@@ -17,7 +17,12 @@ type SyncTask interface {
 	StartExecuteTask()
 }
 
+var (
+	_conf *config.Config
+)
+
 func NewSyncTask(config *config.Config) SyncTask {
+	_conf = config
 	return &syncTaskService{
 		conf: config,
 	}
