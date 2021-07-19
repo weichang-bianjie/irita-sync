@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 const (
@@ -18,6 +19,8 @@ type (
 	SyncTask struct {
 		EndHeight int64  `bson:"end_height"` // task end height
 		Status    string `bson:"status"`     // task status
+		CreateAt  int64  `bson:"create_at"`
+		UpdateAt  int64  `bson:"update_at"` // unix timestamp
 	}
 )
 
@@ -71,9 +74,12 @@ func (d SyncTask) QueryValidFollow() (bool, error) {
 }
 
 func (d SyncTask) Create() error {
+	timenow := time.Now().Unix()
 	task := &SyncTask{
 		EndHeight: 0,
 		Status:    SyncTaskStatusCatchUping,
+		CreateAt:  timenow,
+		UpdateAt:  timenow,
 	}
 	fn := func(c *mgo.Collection) error {
 		pk := task.PkKvPair()
@@ -86,15 +92,17 @@ func (d SyncTask) Create() error {
 	return ExecCollection(d.Name(), fn)
 }
 
-func (d SyncTask) Update(status string) error {
+func (d SyncTask) Update(oldStatus, newStatus string) error {
 	fn := func(c *mgo.Collection) error {
 		err := c.Update(
 			bson.M{
 				"end_height": 0,
+				"status":     oldStatus,
 			},
 			bson.M{
 				"$set": bson.M{
-					"status": status,
+					"status":    newStatus,
+					"update_at": time.Now().Unix(),
 				},
 			})
 		return err

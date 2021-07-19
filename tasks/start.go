@@ -56,14 +56,14 @@ func getHeightTask(chanHeight chan int64, conf *config.Config) {
 			continue
 		}
 		if !exist {
-			models.SyncTaskModel.Update(models.SyncTaskStatusUnderway)
+			models.SyncTaskModel.Update(models.SyncTaskStatusCatchUping, models.SyncTaskStatusUnderway)
 			logger.Info("wait blockChain latest height update",
 				logger.Int64("curSyncedHeight", inProcessBlock-1),
 				logger.Int64("blockChainLatestHeight", inProcessBlock))
 			time.Sleep(1 * time.Second)
 			continue
 		} else {
-			models.SyncTaskModel.Update(models.SyncTaskStatusCatchUping)
+			models.SyncTaskModel.Update(models.SyncTaskStatusUnderway, models.SyncTaskStatusCatchUping)
 			chanHeight <- inProcessBlock
 			inProcessBlock++
 		}
